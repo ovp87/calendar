@@ -1,156 +1,31 @@
 <script setup lang="ts">
-import {ref, computed, onMounted} from 'vue'
-import ICAL from 'ical.js'
+
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue"
-import WeekNavigation from './WeekNavigation.vue'
 import WeekHeader from './WeekHeader.vue'
 import EventItem from './EventItem.vue'
-import { getMonday, getWeekNumber, getGridRow, getGridSpan, layoutEvents } from '../utils/calendarUtils'
-import type { CalendarEvent } from '../utils/calendarUtils'
 import { EllipsisHorizontalIcon } from '@heroicons/vue/24/solid'
+import { layoutEvents, getGridRow, getGridSpan } from '../utils/calendarUtils'
+import type { CalendarEvent } from '../utils/calendarUtils'
 
-const DAY_START_HOUR = 6
-const weekStart = ref(getMonday(new Date()))
-const events = ref<CalendarEvent[]>([])
-
-function nextWeek() {
-  const d = new Date(weekStart.value)
-  d.setDate(d.getDate() + 7)
-  weekStart.value = getMonday(d)
-}
-
-function prevWeek() {
-  const d = new Date(weekStart.value)
-  d.setDate(d.getDate() - 7)
-  weekStart.value = getMonday(d)
-}
-
-const weekDays = computed(() => {
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(weekStart.value)
-    d.setDate(weekStart.value.getDate() + i)
-    return d
-  })
-})
+const DAY_START_HOUR = 6 // 06:00
 
 function eventsForDay(day: Date) {
-  return events.value.filter(e =>
-      e.start.toDateString() === day.toDateString()
-  )
+  return props.events.filter(e => e.start.toDateString() === day.toDateString())
 }
 
-const weekNumber = computed(() => getWeekNumber(weekStart.value))
-
-async function loadCalendars() {
-  try {
-    const [olaEvents, ritaEvents] = await Promise.all([loadOlaIcs(), loadRitaIcs()])
-    events.value = [...olaEvents, ...ritaEvents]
-  } catch (error) {
-    console.error('Failed to load calendars:', error)
-  }
-}
-
-async function loadOlaIcs(): Promise<CalendarEvent[]> {
-  const url = 'http://localhost:3001/calendars/ola/calendar.ics'
-  const res = await fetch(url)
-  const icsData = await res.text()
-  const jcalData = ICAL.parse(icsData)
-  const comp = new ICAL.Component(jcalData)
-  const vevents = comp.getAllSubcomponents('vevent')
-  return vevents.map((vevent: any) => {
-    const event = new ICAL.Event(vevent)
-    return {
-      id: event.uid,
-      title: event.summary,
-      start: event.startDate.toJSDate(),
-      end: event.endDate.toJSDate(),
-      source: 'google',
-      description: event.description,
-      owner: 'ola'
-    } as CalendarEvent
-  })
-}
-
-async function loadRitaIcs(): Promise<CalendarEvent[]> {
-  const url = 'http://localhost:3001/calendars/rita/calendar.ics'
-  const res = await fetch(url)
-  const icsData = await res.text()
-  const jcalData = ICAL.parse(icsData)
-  const comp = new ICAL.Component(jcalData)
-  const vevents = comp.getAllSubcomponents('vevent')
-  return vevents.map((vevent: any) => {
-    const event = new ICAL.Event(vevent)
-    return {
-      id: event.uid,
-      title: event.summary,
-      start: event.startDate.toJSDate(),
-      end: event.endDate.toJSDate(),
-      source: 'icloud',
-      description: event.description,
-      owner: 'rita'
-    } as CalendarEvent
-  })
-}
+const props = defineProps<{
+  weekDays: Date[],
+  events: CalendarEvent[],
+  weekStart: Date
+}>()
 
 
-onMounted(() => {
-  loadCalendars()
-});
 </script>
 
 
 <template>
   <div class="w-full flex flex-col min-h-screen">
-    <button class="bg-gray-200 text-black px-4 py-2 rounded-md my-4 mx-auto block" @click="loadCalendars">
-      Load Google Calendar
-    </button>
-    <WeekNavigation
-        :weekNumber="weekNumber"
-        :prevWeek="prevWeek"
-        :nextWeek="nextWeek"
-    />
     <div class="flex h-full flex-col">
-      <header class="flex-none items-center justify-between border-b border-gray-200 px-6 py-4">
-        <div class="flex items-center">
-          <div class="ml-6 md:hidden">
-            <Menu as="div" class="relative">
-              <MenuButton class="relative flex items-center rounded-full border border-transparent text-gray-400 outline-offset-8 hover:text-gray-500">
-                <span class="absolute -inset-2" />
-                <span class="sr-only">Open menu</span>
-                <EllipsisHorizontalIcon class="size-5" aria-hidden="true" />
-              </MenuButton>
-              <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
-                <MenuItems class="absolute right-0 z-10 mt-3 w-36 origin-top-right divide-y divide-gray-100 overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-hidden">
-                  <div class="py-1">
-                    <MenuItem v-slot="{ active }">
-                      <a href="#" :class="[active ? 'bg-gray-100 text-gray-900 outline-hidden' : 'text-gray-700', 'block px-4 py-2 text-sm']">Create event</a>
-                    </MenuItem>
-                  </div>
-                  <div class="py-1">
-                    <MenuItem v-slot="{ active }">
-                      <a href="#" :class="[active ? 'bg-gray-100 text-gray-900 outline-hidden' : 'text-gray-700', 'block px-4 py-2 text-sm']">Go to today</a>
-                    </MenuItem>
-                  </div>
-                  <div class="py-1">
-                    <MenuItem v-slot="{ active }">
-                      <a href="#" :class="[active ? 'bg-gray-100 text-gray-900 outline-hidden' : 'text-gray-700', 'block px-4 py-2 text-sm']">Day view</a>
-                    </MenuItem>
-                    <MenuItem v-slot="{ active }">
-                      <a href="#" :class="[active ? 'bg-gray-100 text-gray-900 outline-hidden' : 'text-gray-700', 'block px-4 py-2 text-sm']">Week view</a>
-                    </MenuItem>
-                    <MenuItem v-slot="{ active }">
-                      <a href="#" :class="[active ? 'bg-gray-100 text-gray-900 outline-hidden' : 'text-gray-700', 'block px-4 py-2 text-sm']">Month view</a>
-                    </MenuItem>
-                    <MenuItem v-slot="{ active }">
-                      <a href="#" :class="[active ? 'bg-gray-100 text-gray-900 outline-hidden' : 'text-gray-700', 'block px-4 py-2 text-sm']">Year view</a>
-                    </MenuItem>
-                  </div>
-                </MenuItems>
-              </transition>
-            </Menu>
-          </div>
-        </div>
-      </header>
       <div class="flex-auto flex flex-col">
         <div class="isolate flex flex-auto flex-col overflow-y-auto bg-white">
           <div style="width: 165%" class="flex max-w-full flex-none flex-col sm:max-w-none md:max-w-full">

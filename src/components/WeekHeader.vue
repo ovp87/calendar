@@ -11,8 +11,8 @@
           'text-indigo-600': day.toDateString() === (new Date()).toDateString(),
           'text-gray-900': day.toDateString() !== (new Date()).toDateString()
         }">
-        {{ day.toLocaleDateString('nb-NO', { weekday: 'long' }) }}
-        {{ day.toLocaleDateString('nb-NO', { day: '2-digit', month: '2-digit'}) }}
+          {{ day.toLocaleDateString('nb-NO', { weekday: 'long' }) }}
+          {{ day.toLocaleDateString('nb-NO', { day: '2-digit', month: '2-digit'}) }}
       </span>
     </button>
   </div>
@@ -25,12 +25,11 @@
         :key="i"
         class="flex items-center justify-center py-3"
     >
-      <span class="flex items-baseline capitalize relative" :class="{
+      <span class="flex items-baseline capitalize font-bold relative" :class="{
           'text-indigo-600': day.toDateString() === (new Date()).toDateString(),
           'text-gray-900': day.toDateString() !== (new Date()).toDateString()
         }">
-        {{ day.toLocaleDateString('nb-NO', { weekday: 'long' }) }}
-        {{ day.toLocaleDateString('nb-NO', { day: '2-digit', month: '2-digit' }) }}
+        {{ day.toLocaleDateString('nb-NO', { weekday: 'long', month: 'long', day: 'numeric' }) }}
       </span>
     </div>
   </div>
