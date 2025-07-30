@@ -43,21 +43,21 @@ const weekNumber = computed(() => getWeekNumber(weekStart.value))
 
 async function loadCalendars() {
   try {
-    await loadOlaGoogleIcs()
+    const [olaEvents, ritaEvents] = await Promise.all([loadOlaIcs(), loadRitaIcs()])
+    events.value = [...olaEvents, ...ritaEvents]
   } catch (error) {
-    console.error('Failed to load Google Calendar:', error)
+    console.error('Failed to load calendars:', error)
   }
 }
 
-async function loadOlaGoogleIcs() {
+async function loadOlaIcs(): Promise<CalendarEvent[]> {
   const url = 'http://localhost:3001/calendars/ola/calendar.ics'
-  //const url = 'http://localhost:3001/calendar.ics'
   const res = await fetch(url)
   const icsData = await res.text()
   const jcalData = ICAL.parse(icsData)
   const comp = new ICAL.Component(jcalData)
   const vevents = comp.getAllSubcomponents('vevent')
-  const newEvents: CalendarEvent[] = vevents.map((vevent: any) => {
+  return vevents.map((vevent: any) => {
     const event = new ICAL.Event(vevent)
     return {
       id: event.uid,
@@ -65,11 +65,33 @@ async function loadOlaGoogleIcs() {
       start: event.startDate.toJSDate(),
       end: event.endDate.toJSDate(),
       source: 'google',
-      description: event.description
-    }
+      description: event.description,
+      owner: 'ola'
+    } as CalendarEvent
   })
-  events.value = newEvents
 }
+
+async function loadRitaIcs(): Promise<CalendarEvent[]> {
+  const url = 'http://localhost:3001/calendars/rita/calendar.ics'
+  const res = await fetch(url)
+  const icsData = await res.text()
+  const jcalData = ICAL.parse(icsData)
+  const comp = new ICAL.Component(jcalData)
+  const vevents = comp.getAllSubcomponents('vevent')
+  return vevents.map((vevent: any) => {
+    const event = new ICAL.Event(vevent)
+    return {
+      id: event.uid,
+      title: event.summary,
+      start: event.startDate.toJSDate(),
+      end: event.endDate.toJSDate(),
+      source: 'icloud',
+      description: event.description,
+      owner: 'rita'
+    } as CalendarEvent
+  })
+}
+
 
 onMounted(() => {
   loadCalendars()
