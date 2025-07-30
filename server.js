@@ -2,6 +2,8 @@ import express from 'express'
 import fetch from 'node-fetch'
 import cors from 'cors'
 import { exec } from 'child_process'
+import { fileURLToPath } from 'url'
+import path from 'path'
 
 const app = express()
 const PORT = 3001
@@ -36,7 +38,7 @@ app.post('/shutdown', (req, res) => {
     })
 })
 
-app.get('*', (req, res) => {
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'))
 })
 
