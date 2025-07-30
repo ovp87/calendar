@@ -20,6 +20,19 @@ app.get('/calendars/ola/calendar.ics', async (req, res) => {
     }
 })
 
+app.get('/calendars/rita/calendar.ics', async (req, res) => {
+    const ICS_URL = 'https://p116-caldav.icloud.com/published/2/MTQwNzUyMDM5MDE0MDc1Mt37tMt1l5yS3mOOa2Yhh67YAHTeOgU81RUHPIZhmRWl';
+    try {
+        const response = await fetch(ICS_URL)
+        if (!response.ok) throw new Error('Failed to fetch ICS')
+        const text = await response.text()
+        res.set('Content-Type', 'text/calendar')
+        res.send(text)
+    } catch (err) {
+        res.status(500).send('Error fetching ICS')
+    }
+});
+
 app.post('/shutdown', (req, res) => {
     exec('sudo shutdown -h now', (error, stdout, stderr) => {
         if (error) {

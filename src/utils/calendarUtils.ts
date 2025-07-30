@@ -3,8 +3,9 @@ export interface CalendarEvent {
     title: string
     start: Date
     end: Date
-    source: 'google' | 'apple'
-    description?: string
+    source: 'google' | 'icloud'
+    description: string
+    owner: 'ola' | 'rita'
 }
 
 export function getMonday(date: Date) {
