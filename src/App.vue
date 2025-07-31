@@ -56,8 +56,9 @@
 
   const weekNumber = computed(() => getWeekNumber(weekStart.value));
 
-  function setMode(newMode: 'weekly-calendar' | 'weekly-list') {
+  function setMode(newMode: 'weekly-calendar' | 'weekly-list' | 'photo') {
     mode.value = newMode;
+    weekStart.value = getMonday(new Date());
   }
 
   function prevWeek() {
