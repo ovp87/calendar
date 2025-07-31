@@ -7,7 +7,7 @@
   const emit = defineEmits(['next-week', 'prev-week', 'set-mode', 'reset-week', 'power-off']);
 
   const props = defineProps<{
-    mode: 'weekly-calendar' | 'weekly-list' | 'photo',
+    mode: 'weekly-calendar' | 'weekly-list' | 'photo' | 'play',
     showWeekNumber?: boolean,
     weekNumber: number,
     supportedModes: Array<string>

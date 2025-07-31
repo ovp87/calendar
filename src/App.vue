@@ -21,7 +21,7 @@
   ];
 
   const INACTIVITY_TIMEOUT = 5 * 1000 * 60; // 5 minutes
-  const mode = ref<'weekly-calendar' | 'weekly-list' | 'photo'>('photo');
+  const mode = ref<'weekly-calendar' | 'weekly-list' | 'photo' | 'play'>('photo');
   const FETCH_INTERVAL = 5 * 1000 * 60; // 5 minutes
   const CACHE_KEY = 'calendarEventsCache';
   const weekStart = ref(getMonday(new Date()))
@@ -29,11 +29,21 @@
   let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
   let interval: ReturnType<typeof setInterval>;
 
+  const slideDirection = ref('slide-right');
+
   let supportedModes = [
     'photo',
     'weekly-list',
     //'weekly-calendar'
   ];
+
+  const weekNumber = computed(() => getWeekNumber(weekStart.value));
+  const modeComponent = computed(() => {
+    if (mode.value === 'photo') return PhotoSlideshow;
+    if (mode.value === 'weekly-calendar') return Calendar;
+    if (mode.value === 'weekly-list') return WeeklyList;
+    return null;
+  });
 
   function resetInactivityTimer() {
     if (inactivityTimer) clearTimeout(inactivityTimer);
@@ -66,26 +76,32 @@
   }
 
   function nextWeek() {
-    console.log('Next week', weekStart.value);
+    slideDirection.value = 'slide-right';
     const d = new Date(weekStart.value)
     d.setDate(d.getDate() + 7)
     weekStart.value = getMonday(d)
   }
-
-  const weekNumber = computed(() => getWeekNumber(weekStart.value));
-
-  function setMode(newMode: 'weekly-calendar' | 'weekly-list' | 'photo') {
-    mode.value = newMode;
-  }
-
   function prevWeek() {
+    slideDirection.value = 'slide-left';
     const d = new Date(weekStart.value)
     d.setDate(d.getDate() - 7)
     weekStart.value = getMonday(d)
   }
 
+
+  function setMode(newMode: 'weekly-calendar' | 'weekly-list' | 'photo') {
+    mode.value = newMode;
+  }
+
+
   function resetWeek() {
-    weekStart.value = getMonday(new Date());
+    const todayMonday = getMonday(new Date());
+    if (todayMonday > weekStart.value) {
+      slideDirection.value = 'slide-right';
+    } else if (todayMonday < weekStart.value) {
+      slideDirection.value = 'slide-left';
+    }
+    weekStart.value = todayMonday;
   }
 
   const weekDays = computed(() => {
@@ -142,8 +158,8 @@
 
 <template>
   <div
-      class="min-h-screen flex flex-col relative"
-      :class="mode === 'photo' ? 'bg-black' : ''"
+      class="min-h-screen flex flex-col relative transition-bg"
+      :class="{ 'photo-bg': mode === 'photo', 'calendar-bg': mode !== 'photo' }"
   >
     <Header
         class="fixed top-0 left-0 w-full z-50"
@@ -158,10 +174,59 @@
         @reset-week="resetWeek"
         :supported-modes="supportedModes"
     />
-    <div class="flex-1 flex flex-col" :class="mode === 'photo' ? 'pt-12' : ''">
-      <PhotoSlideshow v-if="mode === 'photo'" :images="images" />
-      <Calendar v-if="mode === 'weekly-calendar'" :week-days="weekDays" :week-start="weekStart" :events="events"/>
-      <WeeklyList v-if="mode === 'weekly-list'" :week-days="weekDays" :events="events" :week-start="weekStart"/>
+    <div
+        class="flex-1 flex flex-col"
+        :class="mode === 'photo' ? 'pt-12' : ''"
+        :style="{
+        '--divider-color': mode === 'photo' ? 'rgba(0,0,0,0)' : '#e5e7eb'
+      }"
+    >
+      <Transition name="slide" mode="out-in">
+        <component
+            :is="modeComponent"
+            :key="mode"
+            :images="images"
+            :week-days="weekDays"
+            :week-start="weekStart"
+            :events="events"
+            :slide-direction="slideDirection"
+        />
+      </Transition>
     </div>
   </div>
 </template>
+
+<style scoped>
+.transition-bg {
+  transition: background-color 0.2s;
+}
+.photo-bg {
+  background-color: #000;
+}
+.calendar-bg {
+  background-color: #fff;
+}
+
+/* Slide transition */
+.slide-enter-active, .slide-leave-active {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s;
+  position: absolute;
+  width: 100%;
+}
+.slide-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.slide-enter-to {
+  transform: translateX(0%);
+  opacity: 1;
+}
+.slide-leave-from {
+  transform: translateX(0%);
+  opacity: 1;
+}
+.slide-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+</style>

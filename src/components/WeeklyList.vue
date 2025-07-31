@@ -7,7 +7,8 @@ const NO_EVENTS_TEXT: string = '';
 const props = defineProps<{
   weekDays: Date[],
   events: CalendarEvent[],
-  weekStart: Date
+  weekStart: Date,
+  slideDirection?: string
 }>();
 
 function eventsForDay(day: Date) {
@@ -42,35 +43,80 @@ const daysWithEvents = computed(() =>
 
 <template>
   <div class="w-full flex flex-col">
-    <div class="grid grid-cols-7 divide-x border-t border-gray-100 divide-gray-100">
-      <div v-for="({ day, events }) in daysWithEvents" :key="day.toISOString()" class="flex flex-col">
-        <div class="font-semibold capitalize my-2 text-center pb-2 border-b border-gray-200" :class="{
-          'text-indigo-600': day.toDateString() === (new Date()).toDateString(),
-          'text-gray-900': day.toDateString() !== (new Date()).toDateString()
-        }">
-          {{ day.toLocaleDateString('nb-no', { weekday: 'short', month: 'short', day: 'numeric' }) }}
-        </div>
-        <ul class="flex flex-col">
-          <li v-for="event in events" :key="event.id" class="p-2 mx-4 rounded-lg my-2" :class="{ 'bg-rita': event.owner === 'rita', 'bg-ola': event.owner === 'ola' }">
-            <div>
-              <span v-if="!isAllDay(event)">
-                <span class="text-sm font-semibold" :class="{ 'text-rita': event.owner === 'rita', 'text-ola': event.owner === 'ola' }">
-                  {{ event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-                  -
-                  {{ event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}:
-                </span>
-              </span>
-              <span :class="{ 'text-rita': event.owner === 'rita', 'text-ola': event.owner === 'ola' }">
-                {{ event.title }}
-              </span>
-              <p class="mt-1 text-sm text-gray-500 mb-4" v-if="event.description">{{ event.description }}</p>
+    <Transition :name="slideDirection || 'slide-right'" mode="out-in">
+      <div :key="weekStart.toISOString()">
+        <div class="grid grid-cols-7 divide-x border-t border-gray-100 divide-gray-100">
+          <div v-for="({ day, events }) in daysWithEvents" :key="day.toISOString()" class="flex flex-col">
+            <div class="font-semibold capitalize my-2 text-center pb-2 border-b border-gray-200" :class="{
+              'text-indigo-600': day.toDateString() === (new Date()).toDateString(),
+              'text-gray-900': day.toDateString() !== (new Date()).toDateString()
+            }">
+              {{ day.toLocaleDateString('nb-no', { weekday: 'short', month: 'short', day: 'numeric' }) }}
             </div>
-          </li>
-          <li v-if="events.length === 0" :class="{'p-2': NO_EVENTS_TEXT.length > 0}" class="text-sm text-gray-500">
-            {{ NO_EVENTS_TEXT }}
-          </li>
-        </ul>
+            <ul class="flex flex-col">
+              <li v-for="event in events" :key="event.id" class="p-2 mx-4 rounded-lg my-2" :class="{ 'bg-rita': event.owner === 'rita', 'bg-ola': event.owner === 'ola' }">
+                <div>
+                  <span v-if="!isAllDay(event)">
+                    <span class="text-sm font-semibold" :class="{ 'text-rita': event.owner === 'rita', 'text-ola': event.owner === 'ola' }">
+                      {{ event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                      -
+                      {{ event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}:
+                    </span>
+                  </span>
+                  <span :class="{ 'text-rita': event.owner === 'rita', 'text-ola': event.owner === 'ola' }">
+                    {{ event.title }}
+                  </span>
+                  <p class="mt-1 text-sm text-gray-500 mb-4" v-if="event.description">{{ event.description }}</p>
+                </div>
+              </li>
+              <li v-if="events.length === 0" :class="{'p-2': NO_EVENTS_TEXT.length > 0}" class="text-sm text-gray-500">
+                {{ NO_EVENTS_TEXT }}
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
-    </div>
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+  .slide-right-enter-active, .slide-right-leave-active,
+  .slide-left-enter-active, .slide-left-leave-active {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s;
+    position: absolute;
+    width: 100%;
+  }
+  .slide-right-enter-from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  .slide-right-enter-to {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+  .slide-right-leave-from {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+  .slide-right-leave-to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  .slide-left-enter-from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  .slide-left-enter-to {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+  .slide-left-leave-from {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+  .slide-left-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+</style>
