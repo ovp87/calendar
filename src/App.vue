@@ -49,6 +49,7 @@
   }
 
   function nextWeek() {
+    console.log('Next week', weekStart.value);
     const d = new Date(weekStart.value)
     d.setDate(d.getDate() + 7)
     weekStart.value = getMonday(d)
@@ -58,13 +59,16 @@
 
   function setMode(newMode: 'weekly-calendar' | 'weekly-list' | 'photo') {
     mode.value = newMode;
-    weekStart.value = getMonday(new Date());
   }
 
   function prevWeek() {
     const d = new Date(weekStart.value)
     d.setDate(d.getDate() - 7)
     weekStart.value = getMonday(d)
+  }
+
+  function resetWeek() {
+    weekStart.value = getMonday(new Date());
   }
 
   const weekDays = computed(() => {
@@ -115,8 +119,7 @@
         @next-week="nextWeek"
         @prev-week="prevWeek"
         :week-start="weekStart"
-        :next-week="nextWeek"
-        :prev-week="prevWeek"
+        @reset-week="resetWeek"
     />
     <div class="flex-1 flex flex-col" :class="mode === 'photo' ? 'pt-16' : ''">
       <PhotoSlideshow v-if="mode === 'photo'" :images="images" />
