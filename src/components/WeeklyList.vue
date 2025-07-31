@@ -8,7 +8,7 @@ const props = defineProps<{
   weekDays: Date[],
   events: CalendarEvent[],
   weekStart: Date
-}>()
+}>();
 
 function eventsForDay(day: Date) {
   return props.events
@@ -48,7 +48,7 @@ const daysWithEvents = computed(() =>
           'text-indigo-600': day.toDateString() === (new Date()).toDateString(),
           'text-gray-900': day.toDateString() !== (new Date()).toDateString()
         }">
-          {{ day.toLocaleDateString('nb-no', { weekday: 'long', month: 'long', day: 'numeric' }) }}
+          {{ day.toLocaleDateString('nb-no', { weekday: 'short', month: 'short', day: 'numeric' }) }}
         </div>
         <ul class="flex flex-col">
           <li v-for="event in events" :key="event.id" class="p-2 mx-4 rounded-lg my-2" :class="{ 'bg-rita': event.owner === 'rita', 'bg-ola': event.owner === 'ola' }">

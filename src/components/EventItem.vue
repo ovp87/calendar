@@ -8,7 +8,7 @@
     gridSpan: number
     column: number
     columnCount: number
-  }>()
+  }>();
 
   function isAllDay(event: CalendarEvent) {
     return (

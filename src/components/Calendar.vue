@@ -10,7 +10,7 @@ const props = defineProps<{
   weekDays: Date[],
   events: CalendarEvent[],
   weekStart: Date
-}>()
+}>();
 
 function isAllDay(event: CalendarEvent) {
   return (

@@ -1,3 +1,8 @@
+<script setup lang="ts">
+  defineProps<{ weekDays: Date[] }>();
+</script>
+
+
 <template>
   <!-- Mobile weekday header -->
   <div class="grid grid-cols-7 text-sm/6 text-gray-500 sm:hidden">
@@ -29,12 +34,9 @@
           'text-indigo-600': day.toDateString() === (new Date()).toDateString(),
           'text-gray-900': day.toDateString() !== (new Date()).toDateString()
         }">
-        {{ day.toLocaleDateString('nb-NO', { weekday: 'long', month: 'long', day: 'numeric' }) }}
+        {{ day.toLocaleDateString('nb-NO', { weekday: 'short', month: 'short', day: 'numeric' }) }}
       </span>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-defineProps<{ weekDays: Date[] }>()
-</script>
