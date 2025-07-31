@@ -11,7 +11,7 @@
   const weekStart = ref(getMonday(new Date()))
   const events = ref<CalendarEvent[]>([])
 
-  const mode = ref<'weekly-calendar' | 'weekly-list'>('weekly-calendar');
+  const mode = ref<'weekly-calendar' | 'weekly-list'>('weekly-list');
   function nextWeek() {
     const d = new Date(weekStart.value)
     d.setDate(d.getDate() + 7)

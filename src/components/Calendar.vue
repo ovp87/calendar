@@ -1,17 +1,10 @@
 <script setup lang="ts">
-
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue"
 import WeekHeader from './WeekHeader.vue'
 import EventItem from './EventItem.vue'
-import { EllipsisHorizontalIcon } from '@heroicons/vue/24/solid'
 import { layoutEvents, getGridRow, getGridSpan } from '../utils/calendarUtils'
 import type { CalendarEvent } from '../utils/calendarUtils'
 
 const DAY_START_HOUR = 6 // 06:00
-
-function eventsForDay(day: Date) {
-  return props.events.filter(e => e.start.toDateString() === day.toDateString())
-}
 
 const props = defineProps<{
   weekDays: Date[],
@@ -19,9 +12,29 @@ const props = defineProps<{
   weekStart: Date
 }>()
 
+function isAllDay(event: CalendarEvent) {
+  return (
+      event.start.getHours() === 0 &&
+      event.start.getMinutes() === 0 &&
+      event.end.getHours() === 0 &&
+      event.end.getMinutes() === 0
+  )
+}
 
+function eventsForDay(day: Date) {
+  return props.events.filter(e => e.start.toDateString() === day.toDateString())
+}
+
+function getEventGridRow(event: CalendarEvent) {
+  if (isAllDay(event)) return 1
+  return getGridRow(event.start, DAY_START_HOUR)
+}
+
+function getEventGridSpan(event: CalendarEvent) {
+  if (isAllDay(event)) return 48 // 48 half-hour slots = 24 hours
+  return getGridSpan(event.start, event.end)
+}
 </script>
-
 
 <template>
   <div class="w-full flex flex-col min-h-screen">
@@ -68,8 +81,8 @@ const props = defineProps<{
                       <EventItem
                           :event="event"
                           :col="dayIdx + 1"
-                          :gridRow="getGridRow(event.start, DAY_START_HOUR)"
-                          :gridSpan="getGridSpan(event.start, event.end)"
+                          :gridRow="getEventGridRow(event)"
+                          :gridSpan="getEventGridSpan(event)"
                           :column="event.column"
                           :columnCount="event.columnCount"
                       />

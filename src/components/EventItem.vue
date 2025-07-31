@@ -9,6 +9,16 @@
     column: number
     columnCount: number
   }>()
+
+  function isAllDay(event: CalendarEvent) {
+    return (
+        event.start.getHours() === 0 &&
+        event.start.getMinutes() === 0 &&
+        event.end.getHours() === 0 &&
+        event.end.getMinutes() === 0
+    )
+  }
+
 </script>
 <template>
   <li
@@ -21,10 +31,15 @@
       position: 'relative'
     }"
   >
-    <div class="group absolute inset-1 flex flex-col rounded-lg bg-green-50 p-2 text-xs/5 hover:bg-green-100 break-words whitespace-pre-line">
-      <p class="font-semibold text-green-700">{{ event.title }}</p>
+    <div :class="[event.owner === 'rita' ? 'bg-rita' : '',event.owner === 'ola' ? 'bg-ola' : '']" class="group absolute inset-1 flex flex-col rounded-lg p-2 text-xs/5 break-words whitespace-pre-line">
+      <p class="font-semibold" :class="[event.owner === 'rita' ? 'bg-rita' : '',event.owner === 'ola' ? 'bg-ola' : '']">{{ event.title }}</p>
       <p class="text-black">
-        <time :datetime="event.start.toISOString()">{{ event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</time>
+        <span v-if="isAllDay(event)">Hele dagen</span>
+        <span v-else>
+          <time :datetime="event.start.toISOString()">{{ event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</time>
+          -
+          <time :datetime="event.end.toISOString()">{{ event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</time>
+        </span>
       </p>
     </div>
   </li>
