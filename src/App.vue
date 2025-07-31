@@ -20,14 +20,31 @@
     '/images/10.jpg',
   ];
 
-
+  const INACTIVITY_TIMEOUT = 5 * 1000 * 60; // 5 minutes
+  const mode = ref<'weekly-calendar' | 'weekly-list' | 'photo'>('photo');
+  const FETCH_INTERVAL = 5 * 1000 * 60; // 5 minutes
+  const CACHE_KEY = 'calendarEventsCache';
   const weekStart = ref(getMonday(new Date()))
   const events = ref<CalendarEvent[]>([])
+  let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
+  let interval: ReturnType<typeof setInterval>;
 
-  const mode = ref<'weekly-calendar' | 'weekly-list' | 'photo'>('weekly-list');
+  let supportedModes = [
+    'photo',
+    'weekly-list',
+    //'weekly-calendar'
+  ];
 
-  const FETCH_INTERVAL = 5 * 60 * 1000; // 5 minutes
-  const CACHE_KEY = 'calendarEventsCache';
+  function resetInactivityTimer() {
+    if (inactivityTimer) clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+      resetWeek();
+    }, INACTIVITY_TIMEOUT);
+  }
+
+  function onUserActivity() {
+    resetInactivityTimer();
+  }
 
   function saveEventsToCache(evts: CalendarEvent[]) {
     localStorage.setItem(CACHE_KEY, JSON.stringify(evts));
@@ -102,14 +119,25 @@
   }
 
   onMounted(() => {
+    window.addEventListener('mousemove', onUserActivity);
+    window.addEventListener('keydown', onUserActivity);
+    window.addEventListener('touchstart', onUserActivity);
+    resetInactivityTimer();
     // Load from cache first
     events.value = loadEventsFromCache();
     // Fetch from network
     fetchCalendars();
     // Set up periodic fetching
-    const interval = setInterval(fetchCalendars, FETCH_INTERVAL);
-    onUnmounted(() => clearInterval(interval));
+    interval = setInterval(fetchCalendars, FETCH_INTERVAL);
   });
+
+  onUnmounted(() => {
+    clearInterval(interval);
+    window.removeEventListener('mousemove', onUserActivity);
+    window.removeEventListener('keydown', onUserActivity);
+    window.removeEventListener('touchstart', onUserActivity);
+  });
+
 </script>
 
 <template>
@@ -128,6 +156,7 @@
         @prev-week="prevWeek"
         :week-start="weekStart"
         @reset-week="resetWeek"
+        :supported-modes="supportedModes"
     />
     <div class="flex-1 flex flex-col" :class="mode === 'photo' ? 'pt-12' : ''">
       <PhotoSlideshow v-if="mode === 'photo'" :images="images" />

@@ -10,6 +10,7 @@
     mode: 'weekly-calendar' | 'weekly-list' | 'photo',
     showWeekNumber?: boolean,
     weekNumber: number,
+    supportedModes: Array<string>
   }>();
 
   const currentWeekNumber = getWeekNumber(new Date());
@@ -19,22 +20,22 @@
 <template>
   <div class="relative w-full mb-8">
     <div class="absolute top-4 left-0 flex items-center justify-start px-4">
-      <button @click="emit('power-off')" type="button" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+      <button @click="emit('power-off')" type="button" class="cursor-pointer text-gray-500 hover:text-gray-700">
         <span class="sr-only">Power off</span>
         <PowerIcon class="h-12 w-12" />
       </button>
     </div>
 
     <div class="gap-x-4 absolute top-4 right-0 flex items-center justify-end px-4">
-      <button @click="emit('set-mode', 'photo')" type="button">
+      <button v-if="supportedModes.includes('photo')" class="cursor-pointer" @click="emit('set-mode', 'photo')" type="button">
         <span class="sr-only">Photo slideshow</span>
         <PhotoIcon :class="[props.mode === 'photo' ? 'text-blue-600' : 'text-gray-500']" class="h-12 w-12" />
       </button>
-      <button @click="emit('set-mode', 'weekly-list')" type="button">
+      <button v-if="supportedModes.includes('weekly-list')" class="cursor-pointer" @click="emit('set-mode', 'weekly-list')" type="button">
         <span class="sr-only">Weekly list view</span>
         <NumberedListIcon :class="[props.mode === 'weekly-list' ? 'text-blue-600' : 'text-gray-500']" class="h-12 w-12" />
       </button>
-      <button @click="emit('set-mode', 'weekly-calendar')" type="button">
+      <button  v-if="supportedModes.includes('weekly-calendar')" class="cursor-pointer" @click="emit('set-mode', 'weekly-calendar')" type="button">
         <span class="sr-only">Weekly calendar view</span>
         <CalendarDaysIcon :class="[props.mode === 'weekly-calendar' ? 'text-blue-600' : 'text-gray-500']" class="h-12 w-12" />
       </button>

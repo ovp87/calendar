@@ -41,7 +41,7 @@ const daysWithEvents = computed(() =>
 </script>
 
 <template>
-  <div class="w-full min-h-screen flex flex-col">
+  <div class="w-full flex flex-col">
     <div class="grid grid-cols-7 divide-x border-t border-gray-100 divide-gray-100">
       <div v-for="({ day, events }) in daysWithEvents" :key="day.toISOString()" class="flex flex-col">
         <div class="font-semibold capitalize my-2 text-center pb-2 border-b border-gray-200" :class="{
