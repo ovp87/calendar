@@ -79,6 +79,13 @@
     })
   });
 
+  function powerOff() {
+    fetch('http://localhost:3001/shutdown', { method: 'POST' })
+        .then(res => res.text())
+        .then(msg => alert(msg))
+        .catch(err => alert('Failed to power off: ' + err));
+  }
+
   async function fetchCalendars() {
     try {
       const [olaEvents, ritaEvents] = await Promise.all([
@@ -114,6 +121,7 @@
         class="fixed top-0 left-0 w-full z-50"
         :mode="mode"
         @set-mode="setMode"
+        @power-off="powerOff"
         :show-week-number="mode !== 'photo'"
         :week-number="weekNumber"
         @next-week="nextWeek"
@@ -121,7 +129,7 @@
         :week-start="weekStart"
         @reset-week="resetWeek"
     />
-    <div class="flex-1 flex flex-col" :class="mode === 'photo' ? 'pt-16' : ''">
+    <div class="flex-1 flex flex-col" :class="mode === 'photo' ? 'pt-12' : ''">
       <PhotoSlideshow v-if="mode === 'photo'" :images="images" />
       <Calendar v-if="mode === 'weekly-calendar'" :week-days="weekDays" :week-start="weekStart" :events="events"/>
       <WeeklyList v-if="mode === 'weekly-list'" :week-days="weekDays" :events="events" :week-start="weekStart"/>

@@ -1,10 +1,10 @@
 <script setup lang="ts">
   import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/vue/20/solid"
-  import {CalendarDaysIcon, NumberedListIcon, PhotoIcon, ArrowLeftStartOnRectangleIcon } from "@heroicons/vue/24/outline";
+  import {CalendarDaysIcon, NumberedListIcon, PhotoIcon, ArrowLeftStartOnRectangleIcon, PowerIcon } from "@heroicons/vue/24/outline";
   import { computed } from "vue";
   import { getWeekNumber } from "../utils/calendarUtils.ts";
 
-  const emit = defineEmits(['next-week', 'prev-week', 'set-mode', 'reset-week']);
+  const emit = defineEmits(['next-week', 'prev-week', 'set-mode', 'reset-week', 'power-off']);
 
   const props = defineProps<{
     mode: 'weekly-calendar' | 'weekly-list' | 'photo',
@@ -18,6 +18,13 @@
 
 <template>
   <div class="relative w-full mb-8">
+    <div class="absolute top-4 left-0 flex items-center justify-start px-4">
+      <button @click="emit('power-off')" type="button" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+        <span class="sr-only">Power off</span>
+        <PowerIcon class="h-12 w-12" />
+      </button>
+    </div>
+
     <div class="gap-x-4 absolute top-4 right-0 flex items-center justify-end px-4">
       <button @click="emit('set-mode', 'photo')" type="button">
         <span class="sr-only">Photo slideshow</span>
@@ -39,8 +46,8 @@
         <ChevronLeftIcon class="size-5" aria-hidden="true" />
       </button>
       <h1 class="text-4xl text-center mx-4">Uke {{ weekNumber }}</h1>
-      <button @click="emit('reset-week')" v-if="weekNumber !== currentWeekNumber" type="button" class="cursor-pointer">
-        <ArrowLeftStartOnRectangleIcon class="h-10 w-10"></ArrowLeftStartOnRectangleIcon>
+      <button @click="emit('reset-week')" v-if="weekNumber !== currentWeekNumber" type="button" class="mx-1 cursor-pointer">
+        <ArrowLeftStartOnRectangleIcon class="text-gray-500 h-10 w-10"></ArrowLeftStartOnRectangleIcon>
       </button>
       <button @click="emit('next-week')" type="button" class="cursor-pointer flex h-9 w-12 items-center justify-center rounded-r-md border border-gray-300 pl-1 text-gray-400 hover:text-gray-500 focus:relative md:w-9 md:pl-0 md:hover:bg-gray-50">
         <span class="sr-only">Next week</span>

@@ -8,7 +8,7 @@ const props = defineProps<{
 
 const current = ref(0)
 const interval = ref<number | null>(null)
-const intervalMs = props.intervalMs ?? 10000 // 10 seconds default
+const intervalMs = props.intervalMs ?? 10000 * 6 * 5 // 10 seconds * 6 * 5 = 300 seconds (5 minutes)
 
 const direction = ref<'left' | 'right'>('left')
 
@@ -55,19 +55,26 @@ function handleSwipe() {
   }
 }
 
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'ArrowLeft') prev();
+  if (e.key === 'ArrowRight') next();
+}
+
 onMounted(() => {
-  startInterval()
+  startInterval();
+  window.addEventListener('keydown', handleKeydown);
 })
 onUnmounted(() => {
-  clearIntervalIfNeeded()
+  clearIntervalIfNeeded();
+  window.removeEventListener('keydown', handleKeydown);
 })
 </script>
 
 <template>
-  <div class="w-full h-[calc(100vh-4rem)] bg-black flex items-center justify-center" @touchstart="handleTouchStart" @touchend="handleTouchEnd">
+  <div class="w-full h-[calc(100vh-6rem)] bg-black flex items-center justify-center" @touchstart="handleTouchStart" @touchend="handleTouchEnd">
     <div class="relative w-full h-full flex items-center justify-center overflow-hidden">
       <transition :name="direction === 'left' ? 'slide-left' : 'slide-right'" mode="out-in">
-        <img v-if="props.images.length" :key="current" :src="props.images[current]" class="object-contain w-full h-full bg-black"/>
+        <img alt="" v-if="props.images.length" :key="current" :src="props.images[current]" class="object-contain w-full h-full bg-black"/>
       </transition>
     </div>
   </div>

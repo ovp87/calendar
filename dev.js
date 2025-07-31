@@ -34,13 +34,7 @@ app.get('/calendars/rita/calendar.ics', async (req, res) => {
 });
 
 app.post('/shutdown', (req, res) => {
-    exec('sudo shutdown -h now', (error, stdout, stderr) => {
-        if (error) {
-            res.status(500).send(`Error: ${stderr}`)
-        } else {
-            res.send('Shutting down...')
-        }
-    })
+    res.send('Shutting down...');
 })
 
 
